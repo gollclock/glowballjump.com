@@ -69,6 +69,7 @@
       <p id="finalScore"></p>
       <button onclick="restartGame()">Respawn</button>
     </div>
+    <audio id="deathSound" src="death.mp3" preload="auto"></audio>
   </div>
 
   <script>
@@ -77,6 +78,7 @@
     const scoreDisplay = document.getElementById('score');
     const deathScreen = document.getElementById('deathScreen');
     const finalScoreText = document.getElementById('finalScore');
+    const deathSound = document.getElementById('deathSound');
 
     let jumping = false;
     let velocity = 0;
@@ -138,6 +140,8 @@
 
     function gameOver() {
       isDead = true;
+      deathSound.currentTime = 0;
+      deathSound.play();
       deathScreen.style.display = 'block';
       finalScoreText.textContent = 'You survived ' + score + ' seconds.';
     }
