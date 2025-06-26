@@ -58,6 +58,47 @@
       font-size: 16px;
       cursor: pointer;
     }
+    #activateBreaker {
+      position: absolute;
+      bottom: 20px;
+      right: 20px;
+      padding: 10px;
+      background: black;
+      border: 2px solid red;
+      box-shadow: 0 0 10px red;
+      color: white;
+      font-size: 14px;
+      display: none;
+      cursor: pointer;
+    }
+    #breakerBar {
+      position: absolute;
+      top: 50px;
+      right: 20px;
+      width: 100px;
+      height: 10px;
+      border: 1px solid red;
+      box-shadow: 0 0 5px red;
+      display: none;
+    }
+    #breakerFill {
+      height: 100%;
+      background: red;
+      width: 100%;
+    }
+    #breakerPickup {
+      position: absolute;
+      width: 30px;
+      height: 20px;
+      display: none;
+    }
+    #gunAttached {
+      position: absolute;
+      width: 30px;
+      height: 20px;
+      display: none;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -69,6 +110,11 @@
       <p id="finalScore"></p>
       <button onclick="restartGame()">Respawn</button>
     </div>
+
+    <button id="activateBreaker">Spike Breaker</button>
+    <div id="breakerBar"><div id="breakerFill"></div></div>
+    <img id="breakerPickup" src="https://pixelartmaker.com/art/a78c95496900bdc.png" />
+    <img id="gunAttached" src="https://pixelartmaker.com/art/a78c95496900bdc.png" />
     <audio id="deathSound" src="death.mp3" preload="auto"></audio>
   </div>
 
@@ -80,18 +126,67 @@
     const finalScoreText = document.getElementById('finalScore');
     const deathSound = document.getElementById('deathSound');
 
+    const breakerPickup = document.getElementById('breakerPickup');
+    const gunAttached = document.getElementById('gunAttached');
+    const breakerButton = document.getElementById('activateBreaker');
+    const breakerBar = document.getElementById('breakerBar');
+    const breakerFill = document.getElementById('breakerFill');
+
     let jumping = false;
     let velocity = 0;
     let gravity = -1;
     let isDead = false;
     let score = 0;
     let jumpStrength = 13;
+    let breakerUses = 0;
+    let breakerActive = false;
 
     function jump() {
       if (!jumping && !isDead) {
         velocity = jumpStrength;
         jumping = true;
       }
+    }
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') jump();
+      if (e.code === 'KeyE') activateBreaker();
+    });
+
+    window.addEventListener('mousedown', jump);
+    window.addEventListener('touchstart', jump, { passive: true });
+
+    breakerButton.onclick = activateBreaker;
+
+    function activateBreaker() {
+      if (breakerUses > 0 && !breakerActive) {
+        breakerActive = true;
+      }
+    }
+
+    function collectBreaker() {
+      breakerUses = 6;
+      breakerFill.style.width = '100%';
+      breakerBar.style.display = 'block';
+      breakerButton.style.display = 'block';
+      breakerActive = false;
+      gunAttached.style.display = 'block';
+    }
+
+    function useBreaker(spike) {
+      if (breakerUses > 0 && breakerActive) {
+        breakerUses--;
+        breakerFill.style.width = (breakerUses / 6) * 100 + '%';
+        spike.remove();
+        if (breakerUses === 0) {
+          breakerBar.style.display = 'none';
+          breakerButton.style.display = 'none';
+          breakerActive = false;
+          gunAttached.style.display = 'none';
+        }
+        return true;
+      }
+      return false;
     }
 
     function addSpike() {
@@ -113,9 +208,14 @@
 
         const ballBottom = parseInt(ball.style.bottom) || 20;
         if (spikeX < 120 && spikeX + 25 > 80 && ballBottom < 50) {
-          gameOver();
-          clearInterval(moveSpike);
-          spike.remove();
+          if (breakerActive && breakerUses > 0 && useBreaker(spike)) {
+            clearInterval(moveSpike);
+            return;
+          } else {
+            gameOver();
+            clearInterval(moveSpike);
+            spike.remove();
+          }
         }
 
         if (spikeX < -30) {
@@ -123,6 +223,33 @@
           spike.remove();
         }
       }, 20);
+    }
+
+    function spawnBreaker() {
+      if (Math.random() < 0.12 && !isDead && breakerUses === 0 && breakerPickup.style.display === 'none') {
+        let x = Math.random() * (window.innerWidth - 80) + 40;
+        breakerPickup.style.left = x + 'px';
+        breakerPickup.style.bottom = '20px';
+        breakerPickup.style.display = 'block';
+      }
+    }
+
+    function checkBreakerPickup() {
+      if (breakerPickup.style.display === 'block') {
+        const ballX = ball.offsetLeft;
+        const pickupX = parseInt(breakerPickup.style.left);
+        if (Math.abs(pickupX - ballX) < 50) {
+          breakerPickup.style.display = 'none';
+          collectBreaker();
+        }
+      }
+    }
+
+    function updateGunPosition() {
+      if (breakerUses > 0 && gunAttached.style.display === 'block') {
+        gunAttached.style.left = (ball.offsetLeft + 35) + 'px';
+        gunAttached.style.bottom = (parseInt(ball.style.bottom) + 10) + 'px';
+      }
     }
 
     function randomSpikeTiming() {
@@ -141,41 +268,3 @@
     function gameOver() {
       isDead = true;
       deathSound.currentTime = 0;
-      deathSound.play();
-      deathScreen.style.display = 'block';
-      finalScoreText.textContent = 'You survived ' + score + ' seconds.';
-    }
-
-    function restartGame() {
-      window.location.reload();
-    }
-
-    setInterval(() => {
-      if (isDead) return;
-      velocity += gravity;
-      let bottom = parseInt(ball.style.bottom) || 20;
-      bottom += velocity;
-
-      if (bottom < 20) {
-        bottom = 20;
-        velocity = 0;
-        jumping = false;
-      }
-
-      if (bottom > 200) {
-        bottom = 200;
-        velocity = 0;
-      }
-
-      ball.style.bottom = bottom + 'px';
-    }, 20);
-
-    window.addEventListener('keydown', e => {
-      if (e.code === 'Space') jump();
-    });
-
-    randomSpikeTiming();
-    setInterval(updateScore, 1000);
-  </script>
-</body>
-</html>
