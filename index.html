@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Glowing Red Ball Runner</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    html, body { height: 100%; background: black; font-family: sans-serif; color: white; }
+    #game {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+    }
+    .ball {
+      position: absolute;
+      bottom: 20px;
+      left: 80px;
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: red;
+      box-shadow: 0 0 20px red;
+    }
+    .spike {
+      position: absolute;
+      bottom: 0;
+      width: 25px;
+      height: 40px;
+      background: white;
+      clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    }
+    #score {
+      position: absolute;
+      top: 10px;
+      left: 20px;
+      font-size: 20px;
+    }
+    #deathScreen {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      padding: 40px;
+      background: black;
+      border: 4px solid red;
+      box-shadow: 0 0 30px red;
+      display: none;
+      text-align: center;
+    }
+    #deathScreen button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: black;
+      border: 2px solid red;
+      box-shadow: 0 0 10px red;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div id="game">
+    <div class="ball" id="ball"></div>
+    <div id="score">Score: 0</div>
+    <div id="deathScreen">
+      <h1>Game Over</h1>
+      <p id="finalScore"></p>
+      <button onclick="restartGame()">Respawn</button>
+    </div>
+  </div>
+
+  <script>
+    const game = document.getElementById('game');
+    const ball = document.getElementById('ball');
+    const scoreDisplay = document.getElementById('score');
+    const deathScreen = document.getElementById('deathScreen');
+    const finalScoreText = document.getElementById('finalScore');
+
+    let jumping = false;
+    let velocity = 0;
+    let gravity = -1;
+    let isDead = false;
+    let score = 0;
+    let jumpStrength = 13;
+
+    function jump() {
+      if (!jumping && !isDead) {
+        velocity = jumpStrength;
+        jumping = true;
+      }
+    }
+
+    function addSpike() {
+      const spike = document.createElement('div');
+      spike.className = 'spike';
+      spike.style.left = window.innerWidth + 'px';
+      game.appendChild(spike);
+
+      let spikeX = window.innerWidth;
+      const moveSpike = setInterval(() => {
+        if (isDead) {
+          clearInterval(moveSpike);
+          spike.remove();
+          return;
+        }
+
+        spikeX -= 5;
+        spike.style.left = spikeX + 'px';
+
+        const ballBottom = parseInt(ball.style.bottom) || 20;
+        if (spikeX < 120 && spikeX + 25 > 80 && ballBottom < 50) {
+          gameOver();
+          clearInterval(moveSpike);
+          spike.remove();
+        }
+
+        if (spikeX < -30) {
+          clearInterval(moveSpike);
+          spike.remove();
+        }
+      }, 20);
+    }
+
+    function randomSpikeTiming() {
+      if (isDead) return;
+      addSpike();
+      const delay = Math.random() * 1500 + 600;
+      setTimeout(randomSpikeTiming, delay);
+    }
+
+    function updateScore() {
+      if (isDead) return;
+      score++;
+      scoreDisplay.textContent = 'Score: ' + score;
+    }
+
+    function gameOver() {
+      isDead = true;
+      deathScreen.style.display = 'block';
+      finalScoreText.textContent = 'You survived ' + score + ' seconds.';
+    }
+
+    function restartGame() {
+      window.location.reload();
+    }
+
+    setInterval(() => {
+      if (isDead) return;
+      velocity += gravity;
+      let bottom = parseInt(ball.style.bottom) || 20;
+      bottom += velocity;
+
+      if (bottom < 20) {
+        bottom = 20;
+        velocity = 0;
+        jumping = false;
+      }
+
+      if (bottom > 200) {
+        bottom = 200;
+        velocity = 0;
+      }
+
+      ball.style.bottom = bottom + 'px';
+    }, 20);
+
+    window.addEventListener('keydown', e => {
+      if (e.code === 'Space') jump();
+    });
+
+    randomSpikeTiming();
+    setInterval(updateScore, 1000);
+  </script>
+</body>
+</html>
