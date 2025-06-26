@@ -18,9 +18,7 @@
       background: white;
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     }
-    #score {
-      position: absolute; top: 10px; left: 20px; font-size: 20px;
-    }
+    #score { position: absolute; top: 10px; left: 20px; font-size: 20px; }
     #deathScreen {
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
@@ -235,8 +233,4 @@
       updateGunPosition();
     }, 20);
 
-    setInterval(updateScore, 1000);
-    setInterval(spawnBreaker, 4000);
-    setInterval(checkBreakerPickup, 100);
-    randomSpikeTiming();
-
+    setInterval(updateScore,
