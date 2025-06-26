@@ -79,7 +79,6 @@
     const breakerFill = document.getElementById('breakerFill');
     const breakerPickup = document.getElementById('breakerPickup');
     const gunAttached = document.getElementById('gunAttached');
-    const game = document.getElementById('game');
 
     let jumping = false;
     let velocity = 0;
@@ -130,7 +129,7 @@
       const spike = document.createElement('div');
       spike.className = 'spike';
       spike.style.left = window.innerWidth + 'px';
-      game.appendChild(spike);
+      document.getElementById('game').appendChild(spike);
 
       let spikeX = window.innerWidth;
       const moveSpike = setInterval(() => {
@@ -147,11 +146,9 @@
         if (spikeX < 120 && spikeX + 25 > 80 && ballBottom < 50) {
           if (!useBreaker(spike)) {
             gameOver();
-            clearInterval(moveSpike);
-            spike.remove();
-          } else {
-            clearInterval(moveSpike);
           }
+          clearInterval(moveSpike);
+          spike.remove();
         }
 
         if (spikeX < -30) {
@@ -159,13 +156,6 @@
           spike.remove();
         }
       }, 20);
-    }
-
-    function randomSpikeTiming() {
-      if (isDead) return;
-      addSpike();
-      const delay = Math.random() * 1500 + 600;
-      setTimeout(randomSpikeTiming, delay);
     }
 
     function spawnBreaker() {
@@ -233,4 +223,24 @@
       updateGunPosition();
     }, 20);
 
-    setInterval(updateScore,
+    setInterval(updateScore, 1000);
+    setInterval(spawnBreaker, 4000);
+    setInterval(checkBreakerPickup, 100);
+    randomSpikeTiming();
+
+    function randomSpikeTiming() {
+      if (isDead) return;
+      addSpike();
+      const delay = Math.random() * 1500 + 600;
+      setTimeout(randomSpikeTiming, delay);
+    }
+
+    document.addEventListener('keydown', e => {
+      if (e.code === 'Space') jump();
+      if (e.code === 'KeyE') activateBreaker();
+    });
+    document.addEventListener('mousedown', jump);
+    document.addEventListener('touchstart', jump, { passive: true });
+  </script>
+</body>
+</html>
