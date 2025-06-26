@@ -6,97 +6,52 @@
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body { height: 100%; background: black; font-family: sans-serif; color: white; }
-    #game {
-      position: relative;
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-    }
+    #game { position: relative; width: 100%; height: 100%; overflow: hidden; }
     .ball {
-      position: absolute;
-      bottom: 20px;
-      left: 80px;
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      background: red;
-      box-shadow: 0 0 20px red;
+      position: absolute; bottom: 20px; left: 80px;
+      width: 40px; height: 40px;
+      border-radius: 50%; background: red; box-shadow: 0 0 20px red;
     }
     .spike {
-      position: absolute;
-      bottom: 0;
-      width: 25px;
-      height: 40px;
+      position: absolute; bottom: 0;
+      width: 25px; height: 40px;
       background: white;
       clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
     }
     #score {
-      position: absolute;
-      top: 10px;
-      left: 20px;
-      font-size: 20px;
+      position: absolute; top: 10px; left: 20px; font-size: 20px;
     }
     #deathScreen {
-      position: absolute;
-      top: 50%;
-      left: 50%;
+      position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      padding: 40px;
-      background: black;
-      border: 4px solid red;
-      box-shadow: 0 0 30px red;
-      display: none;
-      text-align: center;
+      padding: 40px; background: black;
+      border: 4px solid red; box-shadow: 0 0 30px red;
+      display: none; text-align: center;
     }
     #deathScreen button {
-      margin-top: 20px;
-      padding: 10px 20px;
-      background: black;
-      border: 2px solid red;
-      box-shadow: 0 0 10px red;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
+      margin-top: 20px; padding: 10px 20px;
+      background: black; border: 2px solid red;
+      box-shadow: 0 0 10px red; color: white;
+      font-size: 16px; cursor: pointer;
     }
     #activateBreaker {
-      position: absolute;
-      bottom: 20px;
-      right: 20px;
-      padding: 10px;
-      background: black;
-      border: 2px solid red;
-      box-shadow: 0 0 10px red;
-      color: white;
-      font-size: 14px;
-      display: none;
-      cursor: pointer;
+      position: absolute; bottom: 20px; right: 20px;
+      padding: 10px; background: black;
+      border: 2px solid red; color: white;
+      font-size: 14px; box-shadow: 0 0 10px red;
+      display: none; cursor: pointer;
     }
     #breakerBar {
-      position: absolute;
-      top: 50px;
-      right: 20px;
-      width: 100px;
-      height: 10px;
-      border: 1px solid red;
-      box-shadow: 0 0 5px red;
+      position: absolute; top: 50px; right: 20px;
+      width: 100px; height: 10px;
+      border: 1px solid red; box-shadow: 0 0 5px red;
       display: none;
     }
     #breakerFill {
-      height: 100%;
-      background: red;
-      width: 100%;
+      height: 100%; background: red; width: 100%;
     }
-    #breakerPickup {
-      position: absolute;
-      width: 30px;
-      height: 20px;
-      display: none;
-    }
-    #gunAttached {
-      position: absolute;
-      width: 30px;
-      height: 20px;
-      display: none;
+    #breakerPickup, #gunAttached {
+      position: absolute; width: 30px; height: 20px; display: none;
       pointer-events: none;
     }
   </style>
@@ -110,27 +65,23 @@
       <p id="finalScore"></p>
       <button onclick="restartGame()">Respawn</button>
     </div>
-
     <button id="activateBreaker">Spike Breaker</button>
     <div id="breakerBar"><div id="breakerFill"></div></div>
     <img id="breakerPickup" src="https://pixelartmaker.com/art/a78c95496900bdc.png" />
     <img id="gunAttached" src="https://pixelartmaker.com/art/a78c95496900bdc.png" />
-    <audio id="deathSound" src="death.mp3" preload="auto"></audio>
   </div>
 
   <script>
-    const game = document.getElementById('game');
     const ball = document.getElementById('ball');
     const scoreDisplay = document.getElementById('score');
     const deathScreen = document.getElementById('deathScreen');
     const finalScoreText = document.getElementById('finalScore');
-    const deathSound = document.getElementById('deathSound');
-
-    const breakerPickup = document.getElementById('breakerPickup');
-    const gunAttached = document.getElementById('gunAttached');
     const breakerButton = document.getElementById('activateBreaker');
     const breakerBar = document.getElementById('breakerBar');
     const breakerFill = document.getElementById('breakerFill');
+    const breakerPickup = document.getElementById('breakerPickup');
+    const gunAttached = document.getElementById('gunAttached');
+    const game = document.getElementById('game');
 
     let jumping = false;
     let velocity = 0;
@@ -148,20 +99,8 @@
       }
     }
 
-    window.addEventListener('keydown', e => {
-      if (e.code === 'Space') jump();
-      if (e.code === 'KeyE') activateBreaker();
-    });
-
-    window.addEventListener('mousedown', jump);
-    window.addEventListener('touchstart', jump, { passive: true });
-
-    breakerButton.onclick = activateBreaker;
-
     function activateBreaker() {
-      if (breakerUses > 0 && !breakerActive) {
-        breakerActive = true;
-      }
+      if (breakerUses > 0 && !breakerActive) breakerActive = true;
     }
 
     function collectBreaker() {
@@ -181,8 +120,8 @@
         if (breakerUses === 0) {
           breakerBar.style.display = 'none';
           breakerButton.style.display = 'none';
-          breakerActive = false;
           gunAttached.style.display = 'none';
+          breakerActive = false;
         }
         return true;
       }
@@ -208,13 +147,12 @@
 
         const ballBottom = parseInt(ball.style.bottom) || 20;
         if (spikeX < 120 && spikeX + 25 > 80 && ballBottom < 50) {
-          if (breakerActive && breakerUses > 0 && useBreaker(spike)) {
-            clearInterval(moveSpike);
-            return;
-          } else {
+          if (!useBreaker(spike)) {
             gameOver();
             clearInterval(moveSpike);
             spike.remove();
+          } else {
+            clearInterval(moveSpike);
           }
         }
 
@@ -223,6 +161,13 @@
           spike.remove();
         }
       }, 20);
+    }
+
+    function randomSpikeTiming() {
+      if (isDead) return;
+      addSpike();
+      const delay = Math.random() * 1500 + 600;
+      setTimeout(randomSpikeTiming, delay);
     }
 
     function spawnBreaker() {
@@ -252,19 +197,46 @@
       }
     }
 
-    function randomSpikeTiming() {
-      if (isDead) return;
-      addSpike();
-      const delay = Math.random() * 1500 + 600;
-      setTimeout(randomSpikeTiming, delay);
-    }
-
     function updateScore() {
-      if (isDead) return;
-      score++;
-      scoreDisplay.textContent = 'Score: ' + score;
+      if (!isDead) {
+        score++;
+        scoreDisplay.textContent = 'Score: ' + score;
+      }
     }
 
     function gameOver() {
       isDead = true;
-      deathSound.currentTime = 0;
+      deathScreen.style.display = 'block';
+      finalScoreText.textContent = 'You survived ' + score + ' seconds.';
+    }
+
+    function restartGame() {
+      window.location.reload();
+    }
+
+    setInterval(() => {
+      if (isDead) return;
+      velocity += gravity;
+      let bottom = parseInt(ball.style.bottom) || 20;
+      bottom += velocity;
+
+      if (bottom < 20) {
+        bottom = 20;
+        velocity = 0;
+        jumping = false;
+      }
+
+      if (bottom > 200) {
+        bottom = 200;
+        velocity = 0;
+      }
+
+      ball.style.bottom = bottom + 'px';
+      updateGunPosition();
+    }, 20);
+
+    setInterval(updateScore, 1000);
+    setInterval(spawnBreaker, 4000);
+    setInterval(checkBreakerPickup, 100);
+    randomSpikeTiming();
+
